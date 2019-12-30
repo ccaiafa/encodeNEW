@@ -88,6 +88,8 @@ switch param
     fe.life.bvals = val;    
   case {'diffusionsignalimage','dsi', 'diffusion_signal_img'}
     fe.life.diffusion_signal_img = val;
+  case {'segmentation'}
+    fe.life.segmentation = val;  
   case {'b0signalimage','b0img', 'diffusion_s0_im','s0image'}
     fe.life.diffusion_S0_img = val;
   case {'usedvoxels'}

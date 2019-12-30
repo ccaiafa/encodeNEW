@@ -1,4 +1,4 @@
-function fe = feConnectomeInit(dwiFile,fgFileName,feFileName,savedir,dwiFileRepeated,anatomyFile,varargin)
+function fe = feConnectomeInit(dwiFile,fgFileName,feFileName,savedir,dwiFileRepeated,anatomyFile,segFile,varargin)
 % Initialize a new connectome (fe) structure. 
 %
 %    fe = feConnectomeInit(dwiFile,fgFileName,feFileName,savedir,dwiFileRepeated,anatomyFile,varargin);
@@ -59,6 +59,10 @@ fe = feConnectomeSetDwi(fe,dwiFile,0);
 if ~notDefined('dwiFileRepeated')
   fe = feConnectomeSetDwi(fe,dwiFileRepeated,1);
 end
+
+%% Voxel segmentation
+% Install the information about voxel segmentation
+fe = feConnectomeSetSegmentation(fe,segFile);
 
 %% Anatomy Install the path tot he anatomical high-resolution file.
 if ~notDefined('anatomyFile')
