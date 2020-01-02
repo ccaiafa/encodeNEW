@@ -89,7 +89,14 @@ switch param
   case {'diffusionsignalimage','dsi', 'diffusion_signal_img'}
     fe.life.diffusion_signal_img = val;
   case {'segmentation'}
-    fe.life.segmentation = val;  
+    niftidata = val.data;
+    coords = varargin{1}; 
+    coords = floor(coords);
+    indx = sub2ind(size(niftidata),coords(:,1),coords(:,2),coords(:,3));
+    temp = squeeze(niftidata(:,:,:));
+    val = temp(indx);  
+    fe.life.segmentation = val;    
+    
   case {'b0signalimage','b0img', 'diffusion_s0_im','s0image'}
     fe.life.diffusion_S0_img = val;
   case {'usedvoxels'}

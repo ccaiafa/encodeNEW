@@ -28,7 +28,9 @@ dwiFile       = '../../../../data/segmentation/dwi_2000.nii.gz';
 feFileName    = 'fe_NANKAI';
 
 %% Identify voxel segmentation from disk.
-segFile       = '../../../../data/segmentation/dwi_data_segmentation.nii.gz';
+%segFile       = '../../../../data/segmentation/dwi_data_segmentation.nii.gz';
+segFile       = '../../../../data/segmentation/change_hcp.nii.gz';
+
 
 %% Encode connectome and data in a multidimensional tensor. 
 
