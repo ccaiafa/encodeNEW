@@ -36,7 +36,7 @@ segFile       = '../../../../data/segmentation/change_hcp.nii.gz';
 
 L = 360; 
 
-fe = feConnectomeInit(dwiFile,fgFileName,feFileName,[],dwiFile,t1File,segFile,L,[1,0]);
+fe = feConnectomeInit(dwiFile,fgFileName,feFileName,[],[],t1File,segFile,L,[1,0]);
 
 %% The encoding model is comprised by a large, sparse Phi tensor containing the connectome.
 %
@@ -70,93 +70,29 @@ disp(['The size of the dictionary D is (Ntheta,Na) = (', ...
           num2str(Number_of_gradient_directions), ...
       ',',num2str(Number_of_Orientations),')'])
 
-%% (4) Example of operating on different modes of the tensor:
-% In this example we show how to efficiently find fascicles (3rd mode)
-% having a particular orientation (1st mode) in the connectome in a
-% neighborhood of a voxel (2nd mode).
+%% Example of identification of fibers connecting two regions: Region A and Region B, each one composed by the union of a series of subregions as included in the segmentation
+%save('variables.mat','-v7.3')
 
-% For example, in the following we explain how to identify fascicles going
-% paralell with axis-z in a particular voxel vecinity.
+%load('variables.mat')
 
-% Using the function feGetAtoms() we can obtain indices of atoms (columns
-% of D), whose orientation is +/-offset degrees appart from the (0,0,1)
-% unit vector
-main_orient = [0,0,1]; % Main orientation
-offset = 5; % Tolerance in degrees.
-atoms_indices = feGetAtoms(fe,main_orient,offset);
+RegionA = [1]; % Subregions of segmentation for Region A
+RegionB = [181]; % Subregions of segmentation for Region A
 
-% Using the function feGetVoxels() we can obtain indices of voxels in the
-% neighborhood of a spatial position ([x,y,z] coordinates)
-center_voxel = [76,78,40]; % [x,y,z] coordinates of a center voxel
-vicinity_size = 3; 
-voxel_indices = feGetVoxels(fe,center_voxel,vicinity_size);
+voxelsA = feGetRegionVox(fe,RegionA); % find voxel indices for Region A
+Phi_subtensorA = Phi(:,voxelsA,:);
+[indsA, ~] = find(Phi_subtensorA); % find nonzero entries of subtensor
+fibers_A_indx = unique(indsA(:,3)); % find fibers touching RegionA
 
-% We restrict our sparse tensor to the orientation (1st mode) meeting the
-% criterion (keeping a subset of horizontal slices) for a particular voxel
-% vecinity.
-Phi_subtensor = Phi(atoms_indices,voxel_indices,:);
+voxelsB = feGetRegionVox(fe,RegionB); % find voxel indices for Region B
+Phi_subtensorB = Phi(:,voxelsB,:);
+[indsB, ~] = find(Phi_subtensorB); % find nonzero entries of subtensor
+fibers_B_indx = unique(indsB(:,3)); % find fibers touching RegionB
 
-% We search for fascicles (3rd mode) having nodes meeting the orientation critierion
-% First, we extract the indices of nonzero entries within the subtensor
-[inds, ~] = find(Phi_subtensor); % find nonzero entries of subtensor
-
-% Second, we identify fascicle indices for those nonzero entries
-fascicles_indices = unique(inds(:,3));
-disp([num2str(length(fascicles_indices)),' fascicles having the orientation ', ...
-      num2str(main_orient),' in their trajectories, were found'])
-
+fibers_AB_indx = intersect(fibers_A_indx,fibers_B_indx); % find fibers touching Regions A and B simultanously
+ 
 % Finally, we generate a visualization of the fascicles and voxels
-Visualize_fascicles(fe,fascicles_indices,voxel_indices, ...
-                    'Subset of fascicles meeting orientation criterion')
+Visualize_fascicles(fe,fibers_AB_indx,voxelsA, voxelsB, ...
+                    'Subset of fascicles connecting A and B')
 
 end
 
-% Below are a set of local matlab functions that are sued in this script.
-function [] = Visualize_fascicles(fe,fascicles_ind,voxel_ind, fig_name)
-% 
-% This function is used to visualize the anatomy of part of connectome
-% fascicles and a region of interest (ROI). 
-% 
-% It calls functions from github.com/francopestilli/mba
-
-colors     = {[.1 .25 .65]};
-viewCoords = [0,0];
-
-fg{1}          = feGet(fe,'fibers img');
-fg{1}.fibers   = fg{1}.fibers(fascicles_ind);
-
-% plot fascicles
-[~, ~] = plotFasciclesNoAnat(fg, colors, viewCoords, fig_name, [1]);
-
-% Plot region of interest (ROI), anatomy voxels.
-set(gcf,'Color',[1 1 1])
-hold on
-offset = 1.5;
-plot3(fe.roi.coords(voxel_ind,1)-offset, ...
-         fe.roi.coords(voxel_ind,2)-offset, ...
-         fe.roi.coords(voxel_ind,3)-offset,'ro', ...
-         'markerfacecolor','r', 'markersize',15)
-
-end
-
-function [fig_h, light_h] = plotFasciclesNoAnat(fascicles, color, viewCoords, fig_name,tracts_to_clean)
-% 
-% This function is used to visualize the anatomy of part of connectome
-% fascicles. 
-%
-% It calls functions from github.com/francopestilli/mba
-
-fig_h = figure('name',fig_name,'color','k');
-hold on
-set(gca,'visible','off','Color','w')
-for iFas  = 1:length(tracts_to_clean)
-    [~, light_h] = mbaDisplayConnectome(fascicles{ tracts_to_clean(iFas) }.fibers,fig_h,color{ tracts_to_clean(iFas) },'single');
-    delete(light_h)
-end
-view(viewCoords(1),viewCoords(2))
-light_h = camlight('right');
-lighting phong;
-set(gcf,'Color',[1 1 1])
-drawnow
-
-end

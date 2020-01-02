@@ -95,7 +95,7 @@ switch param
     indx = sub2ind(size(niftidata),coords(:,1),coords(:,2),coords(:,3));
     temp = squeeze(niftidata(:,:,:));
     val = temp(indx);  
-    fe.life.segmentation = val;    
+    fe.life.M.segmentation = val;    
     
   case {'b0signalimage','b0img', 'diffusion_s0_im','s0image'}
     fe.life.diffusion_S0_img = val;
