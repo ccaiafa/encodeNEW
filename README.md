@@ -124,6 +124,7 @@ This code allows you to compute compute the fascicles weights for two different 
 • fe.life.M.Ntheta: Discretization number in elevation, default = 360.
 • fe.life.M.orient: [3 × Na double], matrix containing in its columns the orientations for each Dictionary element.
 • fe.life.M.DictSig: [Nθ × Na double], Dictionary matrix containing in its columns the canonical diffusion kernel (demeaned) at different orienta- tions.
+• fe.life.M.segmentation: [Nv × 1 int], contains segmentation label imported from nifti file created with FSL software
 • fe.life.xform.img2acpc: [4 × 4 double], Image to ACPC affine trans- form.
 • fe.life.xform.acpc2img: [4 × 4 double], ACPC to image affine trans- form.
 • fe.life.fibers: not used.
